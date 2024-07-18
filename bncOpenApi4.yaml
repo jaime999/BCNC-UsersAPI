@@ -1,0 +1,466 @@
+openapi: 3.0.3
+info:
+  title: Bcnc Group - OpenAPI 3.0
+  description: |-
+    Este es un ejemplo de diseño de una API Rest básica de usuarios para la prueba
+      técnica de la empresa Bcnc Group en
+    Swagger [https://swagger.io](https://swagger.io). Para ello, se han definido
+      distintos endpoints que permitan realizar operaciones con los usuarios y
+    con sus viviendas.
+
+    Links de interés:
+    - [Respositorio de la API](https://github.com/jaime999/BCNC-UsersAPI)
+    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: martinezsanchezjaime@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+servers:
+  - url: https://bcncGroup.swagger.io/api/v3
+tags:
+  - name: Users
+    description: Get, add and update users
+  - name: Houses
+    description: Operations about the houses
+paths:
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Get all the users in a system
+      operationId: getUsers
+      responses:
+        '200':
+          description: Users retrieve succesfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'          
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - Users
+      summary: Create an user
+      description: Create a user with username and password, and optionally email, name and phone
+      operationId: createUser
+      requestBody:
+        $ref: '#/components/requestBodies/UserBody'
+      responses:
+        '201':
+          description: User created succesfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+      security:
+        - users_auth:
+            - write:users
+  /users/{username}:
+    parameters:
+      - name: username
+        in: path
+        description: The username to make operations
+        required: true
+        explode: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Users
+      summary: Get user by user name
+      description: Given the an username, retrieve the info for that user
+      operationId: getUserByUserName
+      responses:
+        '200':
+          description: User retrieved succesfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+    patch:
+      tags:
+        - Users
+      summary: Update partially an existing user
+      description: Modify only some fields of an user
+      operationId: updatePartiallyUser
+      requestBody:
+        $ref: '#/components/requestBodies/UserBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserModified'
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+      security:
+        - users_auth:
+            - write:users
+    put:
+      tags:
+        - Users
+      summary: Update an existing user
+      description: Modify all the info of an user
+      operationId: updateUser
+      requestBody:
+        $ref: '#/components/requestBodies/UserBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserModified'
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+      security:
+        - users_auth:
+            - write:users
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Delete an user of the system
+      operationId: deleteUser
+      responses:
+        '200':
+          description: User deleted succesfully
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+        '409':
+          description: User still has houses assigned
+      security:
+        - users_auth:
+            - write:users
+  /users/{username}/houses:
+    parameters:
+      - name: username
+        in: path
+        description: The username to make operations with their houses
+        required: true
+        explode: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Houses
+      summary: Finds Houses by user
+      description: Retrieve all the houses assigned to an user
+      operationId: housesByUser
+      parameters:
+        - name: city
+          in: query
+          description: City where the houses are located
+          explode: true
+          schema:
+            type: string
+        - name: address
+          in: query
+          description: Address where the houses are located
+          explode: true
+          schema:
+            type: string
+        - name: country
+          in: query
+          description: Country where the houses are located
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Houses retrieved succesfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/House'          
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/House'
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+      security:
+        - users_auth:
+            - write:houses
+    post:
+      tags:
+        - Houses
+      summary: Create a house for an user
+      description: Create and assign a house with his info to an user
+      operationId: createHouse
+      requestBody:
+        $ref: '#/components/requestBodies/HouseBody'
+      responses:
+        '201':
+          description: House created and assigned succesfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/House'
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+      security:
+        - users_auth:
+          - write:houses
+  /users/{username}/houses/{houseId}:
+    parameters:
+      - name: username
+        in: path
+        description: The username to make operations with their houses
+        required: true
+        explode: true
+        schema:
+          type: string
+      - name: houseId
+        in: path
+        description: The ID of the house to modify
+        required: true
+        explode: true
+        schema:
+          type: integer
+          format: int64
+    patch:
+      tags:
+        - Houses
+      summary: Update partially an existing house
+      description: Modify only some info of a house of an user
+      operationId: updatePartiallyHouse
+      requestBody:
+        $ref: '#/components/requestBodies/HouseBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/HouseModified'
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+      security:
+        - users_auth:
+            - write:houses
+    put:
+      tags:
+        - Houses
+      summary: Update an existing house
+      description: Modify all the info of a house of an user
+      operationId: updateHouse
+      requestBody:
+        $ref: '#/components/requestBodies/HouseBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/HouseModified'
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '401':
+          $ref: '#/components/responses/OperationNotAuthorized'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+      security:
+        - users_auth:
+            - write:houses
+    delete:
+      tags:
+        - Houses
+      summary: Delete house for an user
+      description: Delete the house assigned to an user
+      operationId: deleteHouse
+      responses:
+        '200':
+          description: House deleted succesfully
+        '400':
+          $ref: '#/components/responses/InvalidUsername'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+      security:
+        - users_auth:
+          - write:houses
+components:
+  responses:
+    UserNotFound:
+      description: User not found
+    InvalidUsername:
+      description: Invalid username supplied
+    InvalidInput:
+      description: Invalid input
+    OperationNotAuthorized:
+      description: Operation not authorized
+    UserModified:
+      description: User modified succesfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'          
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/User'
+    HouseModified:
+      description: House modified succesfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/House'          
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/House'
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: jaime999
+        password:
+          type: string
+          example: ejCntsñ123@
+        firstName:
+          type: string
+          example: Jaime
+        lastName:
+          type: string
+          example: Martinez
+        email:
+          type: string
+          example: martinezsanchezjaime@gmail.com
+        phone:
+          type: string
+          example: 666666666
+      xml:
+        name: user
+      required:
+        - id
+        - username
+        - password
+    House:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 11
+        country:
+          type: string
+          example: Spain
+        city:
+          type: string
+          example: Valencia
+        address:
+          $ref: '#/components/schemas/Address'
+        userId:
+          type: integer
+          format: int64
+          example: 10
+      xml:
+        name: house
+      required:
+        - id
+        - country
+        - city
+        - address
+        - userId
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          example: Avenida Aragon
+        zip:
+          type: integer
+          format: int32
+          example: 46020
+        door:
+          type: integer
+          format: int16
+          example: 59
+      xml:
+        name: address
+      required:
+        - street
+        - zip
+  requestBodies:
+    UserBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+    HouseBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/House'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/House'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+  securitySchemes:
+    users_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://bcncGroup.swagger.io/oauth/authorize
+          scopes:
+            write:users: modify information of the users
+            write:houses: modify information of the houses
+    apiKeyAuth:
+      type: apiKey
+      name: X-API-Key
+      in: header
+security:
+  - apiKeyAuth: []

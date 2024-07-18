@@ -10,7 +10,7 @@ info:
 
     Links de interés:
     - [Respositorio de la API](https://github.com/jaime999/BCNC-UsersAPI)
-    - [Código fuente de la página del Swagger](https://github.com/jaime999/BCNC-UsersAPI/blob/main/bncOpenApi4.yaml)
+    - [Código fuente de la página del Swagger](https://github.com/jaime999/BCNC-UsersAPI/blob/main/bncOpenApi_def.yaml)
   termsOfService: http://swagger.io/terms/
   contact:
     email: martinezsanchezjaime@gmail.com
